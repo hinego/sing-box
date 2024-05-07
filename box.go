@@ -11,7 +11,6 @@ import (
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/common/taskmonitor"
 	C "github.com/sagernet/sing-box/constant"
-	"github.com/sagernet/sing-box/experimental"
 	"github.com/sagernet/sing-box/experimental/cachefile"
 	"github.com/sagernet/sing-box/experimental/libbox/platform"
 	"github.com/sagernet/sing-box/inbound"
@@ -59,17 +58,10 @@ func New(options Options) (*Box, error) {
 	experimentalOptions := common.PtrValueOrDefault(options.Experimental)
 	applyDebugOptions(common.PtrValueOrDefault(experimentalOptions.Debug))
 	var needCacheFile bool
-	var needClashAPI bool
-	var needV2RayAPI bool
 	if experimentalOptions.CacheFile != nil && experimentalOptions.CacheFile.Enabled || options.PlatformLogWriter != nil {
 		needCacheFile = true
 	}
-	if experimentalOptions.ClashAPI != nil || options.PlatformLogWriter != nil {
-		needClashAPI = true
-	}
-	if experimentalOptions.V2RayAPI != nil && experimentalOptions.V2RayAPI.Listen != "" {
-		needV2RayAPI = true
-	}
+
 	var defaultLogWriter io.Writer
 	if options.PlatformInterface != nil {
 		defaultLogWriter = io.Discard
@@ -77,7 +69,6 @@ func New(options Options) (*Box, error) {
 	logFactory, err := log.New(log.Options{
 		Context:        ctx,
 		Options:        common.PtrValueOrDefault(options.Log),
-		Observable:     needClashAPI,
 		DefaultWriter:  defaultLogWriter,
 		BaseTime:       createdAt,
 		PlatformWriter: options.PlatformLogWriter,
@@ -163,24 +154,6 @@ func New(options Options) (*Box, error) {
 			service.MustRegister[adapter.CacheFile](ctx, cacheFile)
 		}
 		preServices1["cache file"] = cacheFile
-	}
-	if needClashAPI {
-		clashAPIOptions := common.PtrValueOrDefault(experimentalOptions.ClashAPI)
-		clashAPIOptions.ModeList = experimental.CalculateClashModeList(options.Options)
-		clashServer, err := experimental.NewClashServer(ctx, router, logFactory.(log.ObservableFactory), clashAPIOptions)
-		if err != nil {
-			return nil, E.Cause(err, "create clash api server")
-		}
-		router.SetClashServer(clashServer)
-		preServices2["clash api"] = clashServer
-	}
-	if needV2RayAPI {
-		v2rayServer, err := experimental.NewV2RayServer(logFactory.NewLogger("v2ray-api"), common.PtrValueOrDefault(experimentalOptions.V2RayAPI))
-		if err != nil {
-			return nil, E.Cause(err, "create v2ray api server")
-		}
-		router.SetV2RayServer(v2rayServer)
-		preServices2["v2ray api"] = v2rayServer
 	}
 	return &Box{
 		router:       router,
