@@ -33,8 +33,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, t
 		return NewHTTP(ctx, router, logger, tag, options.HTTPOptions)
 	case C.TypeShadowsocks:
 		return NewShadowsocks(ctx, router, logger, tag, options.ShadowsocksOptions)
-	case C.TypeVMess:
-		return NewVMess(ctx, router, logger, tag, options.VMessOptions)
 	case C.TypeTrojan:
 		return NewTrojan(ctx, router, logger, tag, options.TrojanOptions)
 	case C.TypeWireGuard:
