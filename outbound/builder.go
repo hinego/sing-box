@@ -41,8 +41,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, t
 		return NewWireGuard(ctx, router, logger, tag, options.WireGuardOptions)
 	case C.TypeTor:
 		return NewTor(ctx, router, logger, tag, options.TorOptions)
-	case C.TypeSSH:
-		return NewSSH(ctx, router, logger, tag, options.SSHOptions)
 	case C.TypeShadowTLS:
 		return NewShadowTLS(ctx, router, logger, tag, options.ShadowTLSOptions)
 	case C.TypeVLESS:
