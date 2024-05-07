@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
@@ -79,10 +78,6 @@ func mergePathResources(options *option.Options) error {
 		if err != nil {
 			return err
 		}
-		switch outbound.Type {
-		case C.TypeSSH:
-			outbound.SSHOptions = mergeSSHOutboundOptions(outbound.SSHOptions)
-		}
 		if tlsOptions, containsTLSOptions := rawOptions.(option.OutboundTLSOptionsWrapper); containsTLSOptions {
 			tlsOptions.ReplaceOutboundTLSOptions(mergeTLSOutboundOptions(tlsOptions.TakeOutboundTLSOptions()))
 		}
@@ -133,16 +128,6 @@ func mergeTLSOutboundOptions(options *option.OutboundTLSOptions) *option.Outboun
 	}
 	return options
 }
-
-func mergeSSHOutboundOptions(options option.SSHOutboundOptions) option.SSHOutboundOptions {
-	if options.PrivateKeyPath != "" {
-		if content, err := os.ReadFile(os.ExpandEnv(options.PrivateKeyPath)); err == nil {
-			options.PrivateKey = trimStringArray(strings.Split(string(content), "\n"))
-		}
-	}
-	return options
-}
-
 func trimStringArray(array []string) []string {
 	return common.Filter(array, func(it string) bool {
 		return strings.TrimSpace(it) != ""
