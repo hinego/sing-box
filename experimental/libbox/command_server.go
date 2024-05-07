@@ -7,15 +7,12 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/sagernet/sing-box/common/urltest"
-	"github.com/sagernet/sing-box/experimental/clashapi"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/debug"
 	E "github.com/sagernet/sing/common/exceptions"
 	"github.com/sagernet/sing/common/observable"
 	"github.com/sagernet/sing/common/x/list"
-	"github.com/sagernet/sing/service"
 )
 
 type CommandServer struct {
@@ -56,10 +53,10 @@ func NewCommandServer(handler CommandServerHandler, maxLines int32) *CommandServ
 }
 
 func (s *CommandServer) SetService(newService *BoxService) {
-	if newService != nil {
-		service.PtrFromContext[urltest.HistoryStorage](newService.ctx).SetHook(s.urlTestUpdate)
-		newService.instance.Router().ClashServer().(*clashapi.Server).SetModeUpdateHook(s.modeUpdate)
-	}
+	// if newService != nil {
+	// 	service.PtrFromContext[urltest.HistoryStorage](newService.ctx).SetHook(s.urlTestUpdate)
+	// 	newService.instance.Router().ClashServer().(*clashapi.Server).SetModeUpdateHook(s.modeUpdate)
+	// }
 	s.service = newService
 	s.notifyURLTestUpdate()
 }
@@ -170,8 +167,6 @@ func (s *CommandServer) handleConnection(conn net.Conn) error {
 		return s.handleSetGroupExpand(conn)
 	case CommandClashMode:
 		return s.handleModeConn(conn)
-	case CommandSetClashMode:
-		return s.handleSetClashMode(conn)
 	case CommandGetSystemProxyStatus:
 		return s.handleGetSystemProxyStatus(conn)
 	case CommandSetSystemProxyEnabled:

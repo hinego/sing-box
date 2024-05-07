@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/sagernet/sing-box/adapter"
-	"github.com/sagernet/sing-box/experimental/clashapi"
-	E "github.com/sagernet/sing/common/exceptions"
 	"github.com/sagernet/sing/common/rw"
 )
 
@@ -27,23 +25,6 @@ func (c *CommandClient) SetClashMode(newMode string) error {
 		return err
 	}
 	return readError(conn)
-}
-
-func (s *CommandServer) handleSetClashMode(conn net.Conn) error {
-	newMode, err := rw.ReadVString(conn)
-	if err != nil {
-		return err
-	}
-	service := s.service
-	if service == nil {
-		return writeError(conn, E.New("service not ready"))
-	}
-	clashServer := service.instance.Router().ClashServer()
-	if clashServer == nil {
-		return writeError(conn, E.New("Clash API disabled"))
-	}
-	clashServer.(*clashapi.Server).SetMode(newMode)
-	return writeError(conn, nil)
 }
 
 func (c *CommandClient) handleModeConn(conn net.Conn) {
