@@ -7,14 +7,12 @@ import (
 	"os"
 
 	"github.com/sagernet/sing-box/adapter"
-	"github.com/sagernet/sing-box/common/tls"
 	"github.com/sagernet/sing-box/common/uot"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/auth"
-	E "github.com/sagernet/sing/common/exceptions"
 	N "github.com/sagernet/sing/common/network"
 	"github.com/sagernet/sing/protocol/http"
 )
@@ -27,7 +25,6 @@ var (
 type HTTP struct {
 	myInboundAdapter
 	authenticator *auth.Authenticator
-	tlsConfig     tls.ServerConfig
 }
 
 func NewHTTP(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.HTTPMixedInboundOptions) (*HTTP, error) {
@@ -44,42 +41,21 @@ func NewHTTP(ctx context.Context, router adapter.Router, logger log.ContextLogge
 		},
 		authenticator: auth.NewAuthenticator(options.Users),
 	}
-	if options.TLS != nil {
-		tlsConfig, err := tls.NewServer(ctx, logger, common.PtrValueOrDefault(options.TLS))
-		if err != nil {
-			return nil, err
-		}
-		inbound.tlsConfig = tlsConfig
-	}
 	inbound.connHandler = inbound
 	return inbound, nil
 }
 
 func (h *HTTP) Start() error {
-	if h.tlsConfig != nil {
-		err := h.tlsConfig.Start()
-		if err != nil {
-			return E.Cause(err, "create TLS config")
-		}
-	}
 	return h.myInboundAdapter.Start()
 }
 
 func (h *HTTP) Close() error {
 	return common.Close(
 		&h.myInboundAdapter,
-		h.tlsConfig,
 	)
 }
 
 func (h *HTTP) NewConnection(ctx context.Context, conn net.Conn, metadata adapter.InboundContext) error {
-	var err error
-	if h.tlsConfig != nil {
-		conn, err = tls.ServerHandshake(ctx, conn, h.tlsConfig)
-		if err != nil {
-			return err
-		}
-	}
 	return http.HandleConnection(ctx, conn, std_bufio.NewReader(conn), h.authenticator, h.upstreamUserHandler(metadata), adapter.UpstreamMetadata(metadata))
 }
 

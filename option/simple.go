@@ -11,7 +11,6 @@ type HTTPMixedInboundOptions struct {
 	ListenOptions
 	Users          []auth.User `json:"users,omitempty"`
 	SetSystemProxy bool        `json:"set_system_proxy,omitempty"`
-	InboundTLSOptionsContainer
 }
 
 type SocksOutboundOptions struct {
@@ -27,9 +26,8 @@ type SocksOutboundOptions struct {
 type HTTPOutboundOptions struct {
 	DialerOptions
 	ServerOptions
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	OutboundTLSOptionsContainer
-	Path    string     `json:"path,omitempty"`
-	Headers HTTPHeader `json:"headers,omitempty"`
+	Username string     `json:"username,omitempty"`
+	Password string     `json:"password,omitempty"`
+	Path     string     `json:"path,omitempty"`
+	Headers  HTTPHeader `json:"headers,omitempty"`
 }

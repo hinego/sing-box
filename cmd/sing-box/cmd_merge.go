@@ -4,11 +4,8 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/sagernet/sing-box/log"
-	"github.com/sagernet/sing-box/option"
-	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
 	"github.com/sagernet/sing/common/json"
 	"github.com/sagernet/sing/common/rw"
@@ -37,10 +34,6 @@ func merge(outputPath string) error {
 	if err != nil {
 		return err
 	}
-	err = mergePathResources(&mergedOptions)
-	if err != nil {
-		return err
-	}
 	buffer := new(bytes.Buffer)
 	encoder := json.NewEncoder(buffer)
 	encoder.SetIndent("", "  ")
@@ -60,76 +53,4 @@ func merge(outputPath string) error {
 	outputPath, _ = filepath.Abs(outputPath)
 	os.Stderr.WriteString(outputPath + "\n")
 	return nil
-}
-
-func mergePathResources(options *option.Options) error {
-	for index, inbound := range options.Inbounds {
-		rawOptions, err := inbound.RawOptions()
-		if err != nil {
-			return err
-		}
-		if tlsOptions, containsTLSOptions := rawOptions.(option.InboundTLSOptionsWrapper); containsTLSOptions {
-			tlsOptions.ReplaceInboundTLSOptions(mergeTLSInboundOptions(tlsOptions.TakeInboundTLSOptions()))
-		}
-		options.Inbounds[index] = inbound
-	}
-	for index, outbound := range options.Outbounds {
-		rawOptions, err := outbound.RawOptions()
-		if err != nil {
-			return err
-		}
-		if tlsOptions, containsTLSOptions := rawOptions.(option.OutboundTLSOptionsWrapper); containsTLSOptions {
-			tlsOptions.ReplaceOutboundTLSOptions(mergeTLSOutboundOptions(tlsOptions.TakeOutboundTLSOptions()))
-		}
-		options.Outbounds[index] = outbound
-	}
-	return nil
-}
-
-func mergeTLSInboundOptions(options *option.InboundTLSOptions) *option.InboundTLSOptions {
-	if options == nil {
-		return nil
-	}
-	if options.CertificatePath != "" {
-		if content, err := os.ReadFile(options.CertificatePath); err == nil {
-			options.Certificate = trimStringArray(strings.Split(string(content), "\n"))
-		}
-	}
-	if options.KeyPath != "" {
-		if content, err := os.ReadFile(options.KeyPath); err == nil {
-			options.Key = trimStringArray(strings.Split(string(content), "\n"))
-		}
-	}
-	if options.ECH != nil {
-		if options.ECH.KeyPath != "" {
-			if content, err := os.ReadFile(options.ECH.KeyPath); err == nil {
-				options.ECH.Key = trimStringArray(strings.Split(string(content), "\n"))
-			}
-		}
-	}
-	return options
-}
-
-func mergeTLSOutboundOptions(options *option.OutboundTLSOptions) *option.OutboundTLSOptions {
-	if options == nil {
-		return nil
-	}
-	if options.CertificatePath != "" {
-		if content, err := os.ReadFile(options.CertificatePath); err == nil {
-			options.Certificate = trimStringArray(strings.Split(string(content), "\n"))
-		}
-	}
-	if options.ECH != nil {
-		if options.ECH.ConfigPath != "" {
-			if content, err := os.ReadFile(options.ECH.ConfigPath); err == nil {
-				options.ECH.Config = trimStringArray(strings.Split(string(content), "\n"))
-			}
-		}
-	}
-	return options
-}
-func trimStringArray(array []string) []string {
-	return common.Filter(array, func(it string) bool {
-		return strings.TrimSpace(it) != ""
-	})
 }
