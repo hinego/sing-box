@@ -18,8 +18,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 	switch options.Type {
 	case C.TypeTun:
 		return NewTun(ctx, router, logger, options.Tag, options.TunOptions, platformInterface)
-	case C.TypeTProxy:
-		return NewTProxy(ctx, router, logger, options.Tag, options.TProxyOptions), nil
 	case C.TypeSOCKS:
 		return NewSocks(ctx, router, logger, options.Tag, options.SocksOptions), nil
 	case C.TypeHTTP:
