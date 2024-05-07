@@ -34,8 +34,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 		return NewHysteria(ctx, router, logger, options.Tag, options.HysteriaOptions)
 	case C.TypeVLESS:
 		return NewVLESS(ctx, router, logger, options.Tag, options.VLESSOptions)
-	case C.TypeHysteria2:
-		return NewHysteria2(ctx, router, logger, options.Tag, options.Hysteria2Options)
 	default:
 		return nil, E.New("unknown inbound type: ", options.Type)
 	}
