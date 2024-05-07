@@ -22,8 +22,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 		return NewRedirect(ctx, router, logger, options.Tag, options.RedirectOptions), nil
 	case C.TypeTProxy:
 		return NewTProxy(ctx, router, logger, options.Tag, options.TProxyOptions), nil
-	case C.TypeDirect:
-		return NewDirect(ctx, router, logger, options.Tag, options.DirectOptions), nil
 	case C.TypeSOCKS:
 		return NewSocks(ctx, router, logger, options.Tag, options.SocksOptions), nil
 	case C.TypeHTTP:
