@@ -28,8 +28,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 		return NewShadowsocks(ctx, router, logger, options.Tag, options.ShadowsocksOptions)
 	case C.TypeTrojan:
 		return NewTrojan(ctx, router, logger, options.Tag, options.TrojanOptions)
-	case C.TypeVLESS:
-		return NewVLESS(ctx, router, logger, options.Tag, options.VLESSOptions)
 	default:
 		return nil, E.New("unknown inbound type: ", options.Type)
 	}
