@@ -16,7 +16,6 @@ require (
 	github.com/sagernet/sing-mux v0.2.0
 	github.com/sagernet/sing-shadowsocks2 v0.2.0
 	github.com/sagernet/sing-tun v0.2.7-beta.1
-	github.com/sagernet/sing-vmess v0.1.8
 	github.com/sagernet/tfo-go v0.0.0-20231209031829-7b5343ac1dc6
 	github.com/sagernet/utls v1.5.4
 	github.com/sagernet/wireguard-go v0.0.0-20231215174105-89dec3b2f3e8
@@ -37,7 +36,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gaukas/godicttls v0.0.4 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/gofrs/uuid/v5 v5.1.0 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

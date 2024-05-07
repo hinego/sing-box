@@ -27,9 +27,7 @@ import (
 	"github.com/sagernet/sing-box/outbound"
 	"github.com/sagernet/sing-box/transport/fakeip"
 	dns "github.com/sagernet/sing-dns"
-	mux "github.com/sagernet/sing-mux"
 	tun "github.com/sagernet/sing-tun"
-	vmess "github.com/sagernet/sing-vmess"
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/buf"
 	"github.com/sagernet/sing/common/bufio"
@@ -822,10 +820,6 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 	conntrack.KillerCheck()
 	metadata.Network = N.NetworkTCP
 	switch metadata.Destination.Fqdn {
-	case mux.Destination.Fqdn:
-		return E.New("global multiplex is deprecated since sing-box v1.7.0, enable multiplex in inbound options instead.")
-	case vmess.MuxDestination.Fqdn:
-		return E.New("global multiplex (v2ray legacy) not supported since sing-box v1.7.0.")
 	case uot.MagicAddress:
 		return E.New("global UoT not supported since sing-box v1.7.0.")
 	case uot.LegacyMagicAddress:
