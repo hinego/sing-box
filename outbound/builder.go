@@ -39,8 +39,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, t
 		return NewTrojan(ctx, router, logger, tag, options.TrojanOptions)
 	case C.TypeWireGuard:
 		return NewWireGuard(ctx, router, logger, tag, options.WireGuardOptions)
-	case C.TypeHysteria:
-		return NewHysteria(ctx, router, logger, tag, options.HysteriaOptions)
 	case C.TypeTor:
 		return NewTor(ctx, router, logger, tag, options.TorOptions)
 	case C.TypeSSH:
@@ -51,8 +49,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, t
 		return NewVLESS(ctx, router, logger, tag, options.VLESSOptions)
 	case C.TypeTUIC:
 		return NewTUIC(ctx, router, logger, tag, options.TUICOptions)
-	case C.TypeHysteria2:
-		return NewHysteria2(ctx, router, logger, tag, options.Hysteria2Options)
 	case C.TypeSelector:
 		return NewSelector(ctx, router, logger, tag, options.SelectorOptions)
 	case C.TypeURLTest:
