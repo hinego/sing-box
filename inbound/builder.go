@@ -26,8 +26,6 @@ func New(ctx context.Context, router adapter.Router, logger log.ContextLogger, o
 		return NewMixed(ctx, router, logger, options.Tag, options.MixedOptions), nil
 	case C.TypeShadowsocks:
 		return NewShadowsocks(ctx, router, logger, options.Tag, options.ShadowsocksOptions)
-	case C.TypeTrojan:
-		return NewTrojan(ctx, router, logger, options.Tag, options.TrojanOptions)
 	default:
 		return nil, E.New("unknown inbound type: ", options.Type)
 	}
