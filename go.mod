@@ -2,6 +2,8 @@ module github.com/sagernet/sing-box
 
 go 1.20
 
+replace github.com/sagernet/sing-shadowsocks2 v0.2.0 => /opt/temp/singbox_dependon/sing-shadowsocks2
+
 require (
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/insomniacslk/dhcp v0.0.0-20231206064809-8c70d406f6d2
