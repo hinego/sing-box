@@ -68,13 +68,13 @@ func (h *Shadowsocks) DialContext(ctx context.Context, network string, destinati
 	metadata.Destination = destination
 	switch N.NetworkName(network) {
 	case N.NetworkTCP:
-		h.logger.InfoContext(ctx, "outbound connection to ", destination)
+		h.logger.InfoContext(ctx, "outbound connection to TCP = ", destination)
 	case N.NetworkUDP:
 		if h.uotClient != nil {
 			h.logger.InfoContext(ctx, "outbound UoT connect packet connection to ", destination)
 			return h.uotClient.DialContext(ctx, network, destination)
 		} else {
-			h.logger.InfoContext(ctx, "outbound packet connection to ", destination)
+			h.logger.InfoContext(ctx, "outbound packet connection to UDP = ", destination)
 		}
 	}
 	return (*shadowsocksDialer)(h).DialContext(ctx, network, destination)
@@ -88,9 +88,9 @@ func (h *Shadowsocks) ListenPacket(ctx context.Context, destination M.Socksaddr)
 		h.logger.InfoContext(ctx, "outbound UoT packet connection to ", destination)
 		return h.uotClient.ListenPacket(ctx, destination)
 	} else {
-		h.logger.InfoContext(ctx, "outbound packet connection to ", destination)
+		h.logger.InfoContext(ctx, "outbound packet connection to Listen1 = ", destination)
 	}
-	h.logger.InfoContext(ctx, "outbound packet connection to ", destination)
+	h.logger.InfoContext(ctx, "outbound packet connection to  Listen2 =", destination)
 	return (*shadowsocksDialer)(h).ListenPacket(ctx, destination)
 }
 

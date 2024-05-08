@@ -182,6 +182,7 @@ func NewRouter(
 	transportTags := make([]string, len(dnsOptions.Servers))
 	transportTagMap := make(map[string]bool)
 	transportDomainStrategy := make(map[dns.Transport]dns.DomainStrategy)
+	// 把dns server的tag放到transportTags里面，并且检查是否有重复的tag
 	for i, server := range dnsOptions.Servers {
 		var tag string
 		if server.Tag != "" {
@@ -197,16 +198,20 @@ func NewRouter(
 	}
 	ctx = adapter.ContextWithRouter(ctx, router)
 	for {
-		lastLen := len(dummyTransportMap)
+		lastLen := len(dummyTransportMap) // 记录上一次dummyTransportMap的长度
 		for i, server := range dnsOptions.Servers {
-			tag := transportTags[i]
+			tag := transportTags[i] // 获取本次迭代的tag
 			if _, exists := dummyTransportMap[tag]; exists {
+				// 如果dummyTransportMap里面已经有了这个tag，则跳过
 				continue
 			}
 			var detour N.Dialer
+			// 如果没有设置Detour字段，则使用默认的Detour
 			if server.Detour == "" {
+				log.Debug("create default dns server without Detour: ", tag)
 				detour = dialer.NewRouter(router)
 			} else {
+				log.Debug("create default dns server: ", tag, " with Detour: ", server.Detour)
 				detour = dialer.NewDetour(router, server.Detour)
 			}
 			switch server.Address {
@@ -220,6 +225,7 @@ func NewRouter(
 				if serverAddress == "" {
 					serverAddress = server.Address
 				}
+				log.Debug("parse dns server[", tag, "]: ", serverAddress)
 				_, notIpAddress := netip.ParseAddr(serverAddress)
 				if server.AddressResolver != "" {
 					if !transportTagMap[server.AddressResolver] {

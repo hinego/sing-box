@@ -3,6 +3,7 @@ package route
 import (
 	"context"
 	"errors"
+	"log"
 	"net/netip"
 	"strings"
 	"time"
@@ -127,6 +128,7 @@ func (r *Router) Exchange(ctx context.Context, message *mDNS.Msg) (*mDNS.Msg, er
 			)
 
 			dnsCtx, transport, strategy, rule, ruleIndex = r.matchDNS(ctx, true, ruleIndex)
+			log.Println("transport", transport.Name())
 			dnsCtx, cancel = context.WithTimeout(dnsCtx, C.DNSTimeout)
 			if rule != nil && rule.WithAddressLimit() && isAddressQuery(message) {
 				addressLimit = true
@@ -207,6 +209,7 @@ func (r *Router) Lookup(ctx context.Context, domain string, strategy dns.DomainS
 		metadata.ResetRuleCache()
 		metadata.DestinationAddresses = nil
 		dnsCtx, transport, transportStrategy, rule, ruleIndex = r.matchDNS(ctx, false, ruleIndex)
+		log.Println("transport", transport.Name())
 		if strategy == dns.DomainStrategyAsIS {
 			strategy = transportStrategy
 		}

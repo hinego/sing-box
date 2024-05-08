@@ -22,6 +22,7 @@ func (d *RouterDialer) DialContext(ctx context.Context, network string, destinat
 	if err != nil {
 		return nil, err
 	}
+	// 获取默认出站连接
 	return dialer.DialContext(ctx, network, destination)
 }
 
@@ -30,6 +31,7 @@ func (d *RouterDialer) ListenPacket(ctx context.Context, destination M.Socksaddr
 	if err != nil {
 		return nil, err
 	}
+	// 获取默认出站连接
 	return dialer.ListenPacket(ctx, destination)
 }
 
