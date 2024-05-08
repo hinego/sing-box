@@ -378,6 +378,7 @@ func NewRouter(
 	return router, nil
 }
 
+// 初始化
 func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outbound, defaultOutbound func() adapter.Outbound) error {
 	inboundByTag := make(map[string]adapter.Inbound)
 	for _, inbound := range inbounds {
@@ -389,6 +390,7 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 	}
 	var defaultOutboundForConnection adapter.Outbound
 	var defaultOutboundForPacketConnection adapter.Outbound
+	// 如果设置了Final字段，则使用Final字段作为默认出口
 	if r.defaultDetour != "" {
 		detour, loaded := outboundByTag[r.defaultDetour]
 		if !loaded {
@@ -402,6 +404,7 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 		}
 	}
 	var index, packetIndex int
+	// 如果没有设置Final字段，则使用第一个TCP出口作为默认TCP出口
 	if defaultOutboundForConnection == nil {
 		for i, detour := range outbounds {
 			if common.Contains(detour.Network(), N.NetworkTCP) {
@@ -411,6 +414,7 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 			}
 		}
 	}
+	// 如果没有设置Final字段，则使用第一个UDP出口作为默认UDP出口
 	if defaultOutboundForPacketConnection == nil {
 		for i, detour := range outbounds {
 			if common.Contains(detour.Network(), N.NetworkUDP) {
@@ -420,6 +424,7 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 			}
 		}
 	}
+	// 如果实在找不到出口，则使用默认出口（即直连 direct）并且加到 出口 tag
 	if defaultOutboundForConnection == nil || defaultOutboundForPacketConnection == nil {
 		detour := defaultOutbound()
 		if defaultOutboundForConnection == nil {
@@ -431,6 +436,7 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 		outbounds = append(outbounds, detour)
 		outboundByTag[detour.Tag()] = detour
 	}
+	// 如果默认TCP出口和默认UDP出口不一样，则打印日志
 	if defaultOutboundForConnection != defaultOutboundForPacketConnection {
 		var description string
 		if defaultOutboundForConnection.Tag() != "" {
@@ -452,6 +458,8 @@ func (r *Router) Initialize(inbounds []adapter.Inbound, outbounds []adapter.Outb
 	r.defaultOutboundForConnection = defaultOutboundForConnection
 	r.defaultOutboundForPacketConnection = defaultOutboundForPacketConnection
 	r.outboundByTag = outboundByTag
+
+	// 检查所有规则的出口是否存在，如果不存在则返回错误
 	for i, rule := range r.rules {
 		if _, loaded := outboundByTag[rule.Outbound()]; !loaded {
 			return E.New("outbound not found for rule[", i, "]: ", rule.Outbound())
@@ -791,7 +799,7 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 	if r.pauseManager.IsDevicePaused() {
 		return E.New("reject connection to ", metadata.Destination, " while device paused")
 	}
-
+	// 转发给下一跳入站
 	if metadata.InboundDetour != "" {
 		if metadata.LastInbound == metadata.InboundDetour {
 			return E.New("routing loop on detour: ", metadata.InboundDetour)
@@ -825,24 +833,10 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 		return E.New("global UoT (legacy) not supported since sing-box v1.7.0.")
 	}
 
-	// if r.fakeIPStore != nil && r.fakeIPStore.Contains(metadata.Destination.Addr) {
-	// 	domain, loaded := r.fakeIPStore.Lookup(metadata.Destination.Addr)
-	// 	if !loaded {
-	// 		return E.New("missing fakeip context")
-	// 	}
-	// 	metadata.OriginDestination = metadata.Destination
-	// 	metadata.Destination = M.Socksaddr{
-	// 		Fqdn: domain,
-	// 		Port: metadata.Destination.Port,
-	// 	}
-	// 	metadata.FakeIP = true
-	// 	r.logger.DebugContext(ctx, "found fakeip domain: ", domain)
-	// }
-
 	if deadline.NeedAdditionalReadDeadline(conn) {
 		conn = deadline.NewConn(conn)
 	}
-
+	// 如果已启用sniff
 	if metadata.InboundOptions.SniffEnabled {
 		buffer := buf.NewPacket()
 		sniffMetadata, err := sniff.PeekStream(ctx, conn, buffer, time.Duration(metadata.InboundOptions.SniffTimeout), sniff.StreamDomainNameQuery, sniff.TLSClientHello, sniff.HTTPHost)
@@ -869,7 +863,7 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 			buffer.Release()
 		}
 	}
-
+	// 如果已启用DNS反向映射 并且域名为空 则尝试获取其域名
 	if r.dnsReverseMapping != nil && metadata.Domain == "" {
 		domain, loaded := r.dnsReverseMapping.Query(metadata.Destination.Addr)
 		if loaded {
@@ -877,7 +871,7 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 			r.logger.DebugContext(ctx, "found reserve mapped domain: ", metadata.Domain)
 		}
 	}
-
+	// 如果目标地址为FQDN 并且域名策略不为AsIS 则进行DNS解析
 	if metadata.Destination.IsFqdn() && dns.DomainStrategy(metadata.InboundOptions.DomainStrategy) != dns.DomainStrategyAsIS {
 		addresses, err := r.Lookup(adapter.WithContext(ctx, &metadata), metadata.Destination.Fqdn, dns.DomainStrategy(metadata.InboundOptions.DomainStrategy))
 		if err != nil {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/sagernet/sing-box/adapter"
 	C "github.com/sagernet/sing-box/constant"
-	"github.com/sagernet/sing-dns"
+	dns "github.com/sagernet/sing-dns"
 	"github.com/sagernet/sing/common/cache"
 	E "github.com/sagernet/sing/common/exceptions"
 	F "github.com/sagernet/sing/common/format"
@@ -183,6 +183,7 @@ func (r *Router) Lookup(ctx context.Context, domain string, strategy dns.DomainS
 		cached        bool
 		err           error
 	)
+	// 如果存在缓存，则直接返回缓存的结果
 	responseAddrs, cached = r.dnsClient.LookupCache(ctx, domain, strategy)
 	if cached {
 		return responseAddrs, nil

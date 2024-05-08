@@ -27,6 +27,8 @@ import (
 var _ adapter.Service = (*Box)(nil)
 
 type Box struct {
+	ctx          context.Context
+	lastOptions  Options
 	createdAt    time.Time
 	router       adapter.Router
 	inbounds     []adapter.Inbound
@@ -44,6 +46,12 @@ type Options struct {
 	Context           context.Context
 	PlatformInterface platform.Interface
 	PlatformLogWriter log.PlatformWriter
+}
+
+type UpdateOptions struct {
+	Outbounds []option.Outbound
+	Route     *option.RouteOptions
+	DNS       *option.DNSOptions
 }
 
 func New(options Options) (*Box, error) {
@@ -142,6 +150,8 @@ func New(options Options) (*Box, error) {
 	preServices2 := make(map[string]adapter.Service)
 	postServices := make(map[string]adapter.Service)
 	return &Box{
+		ctx:          ctx,
+		lastOptions:  options,
 		router:       router,
 		inbounds:     inbounds,
 		outbounds:    outbounds,
@@ -154,9 +164,54 @@ func New(options Options) (*Box, error) {
 		done:         make(chan struct{}),
 	}, nil
 }
-func (s *Box) Update() {
-
+func (s *Box) Update(options UpdateOptions) (err error) {
+	var (
+		router    *route.Router
+		outbounds = make([]adapter.Outbound, 0)
+	)
+	if router, err = route.NewRouter(
+		s.ctx,
+		s.logFactory,
+		common.PtrValueOrDefault(options.Route),
+		common.PtrValueOrDefault(options.DNS),
+		common.PtrValueOrDefault(s.lastOptions.NTP),
+		s.lastOptions.Inbounds,
+		s.lastOptions.PlatformInterface,
+	); err != nil {
+		return
+	}
+	for i, outboundOptions := range options.Outbounds {
+		var out adapter.Outbound
+		var tag string
+		if outboundOptions.Tag != "" {
+			tag = outboundOptions.Tag
+		} else {
+			tag = F.ToString(i)
+		}
+		out, err = outbound.New(
+			s.ctx,
+			router,
+			s.logFactory.NewLogger(F.ToString("outbound/", outboundOptions.Type, "[", tag, "]")),
+			tag,
+			outboundOptions)
+		if err != nil {
+			return E.Cause(err, "parse outbound[", i, "]")
+		}
+		outbounds = append(outbounds, out)
+	}
+	if err = router.Initialize(s.inbounds, outbounds, func() adapter.Outbound {
+		out, oErr := outbound.New(s.ctx, router, s.logFactory.NewLogger("outbound/direct"), "direct", option.Outbound{Type: "direct", Tag: "default"})
+		common.Must(oErr)
+		outbounds = append(outbounds, out)
+		return out
+	}); err != nil {
+		return err
+	}
+	s.outbounds = outbounds
+	s.router = router
+	return
 }
+
 func (s *Box) PreStart() error {
 	err := s.preStart()
 	if err != nil {
