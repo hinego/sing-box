@@ -66,5 +66,6 @@ func New(options Options) (Factory, error) {
 	} else {
 		factory.SetLevel(LevelTrace)
 	}
+
 	return factory, nil
 }

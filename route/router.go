@@ -1015,6 +1015,9 @@ func (r *Router) RoutePacketConnection(ctx context.Context, conn N.PacketConn, m
 	if err != nil {
 		return err
 	}
+	if metadata.Protocol == "dns" {
+		log.Debug("DNS packet connection: ", metadata.Destination, " => ", detour.Tag(), "matchedRule:", matchedRule)
+	}
 	if !common.Contains(detour.Network(), N.NetworkUDP) {
 		return E.New("missing supported outbound, closing packet connection")
 	}
