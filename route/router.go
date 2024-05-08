@@ -825,19 +825,19 @@ func (r *Router) RouteConnection(ctx context.Context, conn net.Conn, metadata ad
 		return E.New("global UoT (legacy) not supported since sing-box v1.7.0.")
 	}
 
-	if r.fakeIPStore != nil && r.fakeIPStore.Contains(metadata.Destination.Addr) {
-		domain, loaded := r.fakeIPStore.Lookup(metadata.Destination.Addr)
-		if !loaded {
-			return E.New("missing fakeip context")
-		}
-		metadata.OriginDestination = metadata.Destination
-		metadata.Destination = M.Socksaddr{
-			Fqdn: domain,
-			Port: metadata.Destination.Port,
-		}
-		metadata.FakeIP = true
-		r.logger.DebugContext(ctx, "found fakeip domain: ", domain)
-	}
+	// if r.fakeIPStore != nil && r.fakeIPStore.Contains(metadata.Destination.Addr) {
+	// 	domain, loaded := r.fakeIPStore.Lookup(metadata.Destination.Addr)
+	// 	if !loaded {
+	// 		return E.New("missing fakeip context")
+	// 	}
+	// 	metadata.OriginDestination = metadata.Destination
+	// 	metadata.Destination = M.Socksaddr{
+	// 		Fqdn: domain,
+	// 		Port: metadata.Destination.Port,
+	// 	}
+	// 	metadata.FakeIP = true
+	// 	r.logger.DebugContext(ctx, "found fakeip domain: ", domain)
+	// }
 
 	if deadline.NeedAdditionalReadDeadline(conn) {
 		conn = deadline.NewConn(conn)

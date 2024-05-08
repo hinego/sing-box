@@ -154,7 +154,9 @@ func New(options Options) (*Box, error) {
 		done:         make(chan struct{}),
 	}, nil
 }
+func (s *Box) Update() {
 
+}
 func (s *Box) PreStart() error {
 	err := s.preStart()
 	if err != nil {
