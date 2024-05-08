@@ -30,14 +30,14 @@ type HTTP struct {
 func NewHTTP(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.HTTPMixedInboundOptions) (*HTTP, error) {
 	inbound := &HTTP{
 		myInboundAdapter: myInboundAdapter{
-			protocol:       C.TypeHTTP,
-			network:        []string{N.NetworkTCP},
-			ctx:            ctx,
-			router:         uot.NewRouter(router, logger),
-			logger:         logger,
-			tag:            tag,
-			listenOptions:  options.ListenOptions,
-			setSystemProxy: options.SetSystemProxy,
+			protocol:      C.TypeHTTP,
+			network:       []string{N.NetworkTCP},
+			ctx:           ctx,
+			router:        uot.NewRouter(router, logger),
+			logger:        logger,
+			tag:           tag,
+			listenOptions: options.ListenOptions,
+			// setSystemProxy: options.SetSystemProxy,
 		},
 		authenticator: auth.NewAuthenticator(options.Users),
 	}

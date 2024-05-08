@@ -5,8 +5,6 @@ import (
 	"net"
 
 	"github.com/sagernet/sing-box/adapter"
-	"github.com/sagernet/sing-box/common/settings"
-	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
@@ -33,8 +31,8 @@ type myInboundAdapter struct {
 
 	// http mixed
 
-	setSystemProxy bool
-	systemProxy    settings.SystemProxy
+	// setSystemProxy bool
+	// systemProxy    settings.SystemProxy
 
 	// internal
 
@@ -90,35 +88,35 @@ func (a *myInboundAdapter) Start() error {
 			go a.loopUDPOut()
 		}
 	}
-	if a.setSystemProxy {
-		listenPort := M.SocksaddrFromNet(a.tcpListener.Addr()).Port
-		var listenAddrString string
-		listenAddr := a.listenOptions.Listen.Build()
-		if listenAddr.IsUnspecified() {
-			listenAddrString = "127.0.0.1"
-		} else {
-			listenAddrString = listenAddr.String()
-		}
-		var systemProxy settings.SystemProxy
-		systemProxy, err = settings.NewSystemProxy(a.ctx, M.ParseSocksaddrHostPort(listenAddrString, listenPort), a.protocol == C.TypeMixed)
-		if err != nil {
-			return E.Cause(err, "initialize system proxy")
-		}
-		err = systemProxy.Enable()
-		if err != nil {
-			return E.Cause(err, "set system proxy")
-		}
-		a.systemProxy = systemProxy
-	}
+	// if a.setSystemProxy {
+	// 	listenPort := M.SocksaddrFromNet(a.tcpListener.Addr()).Port
+	// 	var listenAddrString string
+	// 	listenAddr := a.listenOptions.Listen.Build()
+	// 	if listenAddr.IsUnspecified() {
+	// 		listenAddrString = "127.0.0.1"
+	// 	} else {
+	// 		listenAddrString = listenAddr.String()
+	// 	}
+	// 	var systemProxy settings.SystemProxy
+	// 	systemProxy, err = settings.NewSystemProxy(a.ctx, M.ParseSocksaddrHostPort(listenAddrString, listenPort), a.protocol == C.TypeMixed)
+	// 	if err != nil {
+	// 		return E.Cause(err, "initialize system proxy")
+	// 	}
+	// 	err = systemProxy.Enable()
+	// 	if err != nil {
+	// 		return E.Cause(err, "set system proxy")
+	// 	}
+	// 	a.systemProxy = systemProxy
+	// }
 	return nil
 }
 
 func (a *myInboundAdapter) Close() error {
 	a.inShutdown.Store(true)
 	var err error
-	if a.systemProxy != nil && a.systemProxy.IsEnabled() {
-		err = a.systemProxy.Disable()
-	}
+	// if a.systemProxy != nil && a.systemProxy.IsEnabled() {
+	// 	err = a.systemProxy.Disable()
+	// }
 	return E.Errors(err, common.Close(
 		a.tcpListener,
 		common.PtrOrNil(a.udpConn),

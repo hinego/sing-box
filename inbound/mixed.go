@@ -35,14 +35,14 @@ type Mixed struct {
 func NewMixed(ctx context.Context, router adapter.Router, logger log.ContextLogger, tag string, options option.HTTPMixedInboundOptions) *Mixed {
 	inbound := &Mixed{
 		myInboundAdapter{
-			protocol:       C.TypeMixed,
-			network:        []string{N.NetworkTCP},
-			ctx:            ctx,
-			router:         uot.NewRouter(router, logger),
-			logger:         logger,
-			tag:            tag,
-			listenOptions:  options.ListenOptions,
-			setSystemProxy: options.SetSystemProxy,
+			protocol:      C.TypeMixed,
+			network:       []string{N.NetworkTCP},
+			ctx:           ctx,
+			router:        uot.NewRouter(router, logger),
+			logger:        logger,
+			tag:           tag,
+			listenOptions: options.ListenOptions,
+			// setSystemProxy: options.SetSystemProxy,
 		},
 		auth.NewAuthenticator(options.Users),
 	}
