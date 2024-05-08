@@ -25,7 +25,6 @@ import (
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing-box/outbound"
-	"github.com/sagernet/sing-box/transport/fakeip"
 	dns "github.com/sagernet/sing-dns"
 	tun "github.com/sagernet/sing-tun"
 	"github.com/sagernet/sing/common"
@@ -309,17 +308,17 @@ func NewRouter(
 		router.dnsReverseMapping = NewDNSReverseMapping()
 	}
 
-	if fakeIPOptions := dnsOptions.FakeIP; fakeIPOptions != nil && dnsOptions.FakeIP.Enabled {
-		var inet4Range netip.Prefix
-		var inet6Range netip.Prefix
-		if fakeIPOptions.Inet4Range != nil {
-			inet4Range = *fakeIPOptions.Inet4Range
-		}
-		if fakeIPOptions.Inet6Range != nil {
-			inet6Range = *fakeIPOptions.Inet6Range
-		}
-		router.fakeIPStore = fakeip.NewStore(ctx, router.logger, inet4Range, inet6Range)
-	}
+	// if fakeIPOptions := dnsOptions.FakeIP; fakeIPOptions != nil && dnsOptions.FakeIP.Enabled {
+	// 	var inet4Range netip.Prefix
+	// 	var inet6Range netip.Prefix
+	// 	if fakeIPOptions.Inet4Range != nil {
+	// 		inet4Range = *fakeIPOptions.Inet4Range
+	// 	}
+	// 	if fakeIPOptions.Inet6Range != nil {
+	// 		inet6Range = *fakeIPOptions.Inet6Range
+	// 	}
+	// 	router.fakeIPStore = fakeip.NewStore(ctx, router.logger, inet4Range, inet6Range)
+	// }
 
 	usePlatformDefaultInterfaceMonitor := platformInterface != nil && platformInterface.UsePlatformDefaultInterfaceMonitor()
 	needInterfaceMonitor := options.AutoDetectInterface || common.Any(inbounds, func(inbound option.Inbound) bool {
