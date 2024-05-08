@@ -11,7 +11,6 @@ import (
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/common/taskmonitor"
 	C "github.com/sagernet/sing-box/constant"
-	"github.com/sagernet/sing-box/experimental/cachefile"
 	"github.com/sagernet/sing-box/experimental/libbox/platform"
 	"github.com/sagernet/sing-box/inbound"
 	"github.com/sagernet/sing-box/log"
@@ -57,11 +56,6 @@ func New(options Options) (*Box, error) {
 	ctx = pause.WithDefaultManager(ctx)
 	experimentalOptions := common.PtrValueOrDefault(options.Experimental)
 	applyDebugOptions(common.PtrValueOrDefault(experimentalOptions.Debug))
-	var needCacheFile bool
-	if experimentalOptions.CacheFile != nil && experimentalOptions.CacheFile.Enabled || options.PlatformLogWriter != nil {
-		needCacheFile = true
-	}
-
 	var defaultLogWriter io.Writer
 	if options.PlatformInterface != nil {
 		defaultLogWriter = io.Discard
@@ -147,14 +141,6 @@ func New(options Options) (*Box, error) {
 	preServices1 := make(map[string]adapter.Service)
 	preServices2 := make(map[string]adapter.Service)
 	postServices := make(map[string]adapter.Service)
-	if needCacheFile {
-		cacheFile := service.FromContext[adapter.CacheFile](ctx)
-		if cacheFile == nil {
-			cacheFile = cachefile.New(ctx, common.PtrValueOrDefault(experimentalOptions.CacheFile))
-			service.MustRegister[adapter.CacheFile](ctx, cacheFile)
-		}
-		preServices1["cache file"] = cacheFile
-	}
 	return &Box{
 		router:       router,
 		inbounds:     inbounds,
